@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nemani Anirudh | Embedded Systems & FPGA Engineer</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050a0e;
+  --bg2: #080f15;
+  --bg3: #0c1820;
+  --bg4: #101f2d;
+  --green: #00ff88;
+  --cyan: #00e5ff;
+  --yellow: #ffe600;
+  --text: #dff0f8;
+  --text2: #6a90aa;
+  --text3: #2e4d60;
+  --border: #132435;
+  --mono: 'Share Tech Mono', monospace;
+  --disp: 'Rajdhani', sans-serif;
+  --body: 'Exo 2', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.75;
+  overflow-x: hidden;
+  cursor: none;
+}
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--green); }
+
+/* ── CURSOR ── */
+#cur { position:fixed; width:10px; height:10px; background:var(--green); border-radius:50%; pointer-events:none; z-index:99999; transform:translate(-50%,-50%); box-shadow:0 0 12px var(--green),0 0 30px rgba(0,255,136,.35); transition:width .15s,height .15s; }
+#cur2 { position:fixed; width:34px; height:34px; border:1px solid rgba(0,255,136,.45); border-radius:50%; pointer-events:none; z-index:99998; transform:translate(-50%,-50%); transition:left .12s ease,top .12s ease,width .2s,height .2s; }
+.big #cur { width:18px; height:18px; }
+.big #cur2 { width:48px; height:48px; }
+
+/* ── LOADER ── */
+#loader { position:fixed; inset:0; background:var(--bg); z-index:99990; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; transition:opacity .5s,visibility .5s; }
+#loader.off { opacity:0; visibility:hidden; }
+.ld-title { font-family:var(--mono); font-size:12px; color:var(--green); letter-spacing:4px; }
+.ld-bar { width:220px; height:2px; background:var(--border); position:relative; overflow:hidden; }
+.ld-fill { height:100%; background:var(--green); box-shadow:0 0 8px var(--green); transition:width 1.8s ease; }
+.ld-msg { font-family:var(--mono); font-size:10px; color:var(--text3); letter-spacing:2px; height:14px; }
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  height:62px; padding:0 6%;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(5,10,14,.88); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  transition:border-color .3s;
+}
+nav.lit { border-color:rgba(0,255,136,.18); }
+.logo { font-family:var(--mono); font-size:13px; color:var(--green); letter-spacing:2px; }
+.logo em { color:var(--text3); font-style:normal; }
+.nav-links { display:flex; gap:2rem; list-style:none; }
+.nav-links a {
+  font-family:var(--disp); font-size:12px; font-weight:600;
+  letter-spacing:2px; text-transform:uppercase;
+  color:var(--text2); text-decoration:none;
+  position:relative; transition:color .3s;
+}
+.nav-links a::after { content:''; position:absolute; bottom:-3px; left:0; right:0; height:1px; background:var(--green); transform:scaleX(0); transition:transform .3s; }
+.nav-links a:hover,.nav-links a.on { color:var(--green); }
+.nav-links a:hover::after,.nav-links a.on::after { transform:scaleX(1); }
+
+/* ── HERO ── */
+#hero {
+  min-height:100vh; position:relative; overflow:hidden;
+  display:flex; align-items:center; padding:80px 6% 0;
+}
+#cbg { position:absolute; inset:0; opacity:.13; }
+.grid-bg {
+  position:absolute; inset:0;
+  background-image:linear-gradient(rgba(0,255,136,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.025) 1px,transparent 1px);
+  background-size:55px 55px;
+}
+.scan { position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px); z-index:1; pointer-events:none; }
+.hero-wrap { position:relative; z-index:2; display:grid; grid-template-columns:1fr 360px; gap:4rem; align-items:center; max-width:1180px; width:100%; margin:0 auto; }
+
+.htag { font-family:var(--mono); font-size:11px; color:var(--green); letter-spacing:4px; text-transform:uppercase; margin-bottom:.75rem; opacity:0; animation:fu .6s .2s forwards; }
+.hname { font-family:var(--disp); font-size:clamp(2.4rem,5vw,4rem); font-weight:700; line-height:1.05; margin-bottom:.4rem; opacity:0; animation:fu .6s .4s forwards; }
+.hname .g { color:var(--green); text-shadow:0 0 35px rgba(0,255,136,.4); }
+.htitle { font-family:var(--mono); font-size:13px; color:var(--cyan); margin-bottom:1.4rem; opacity:0; animation:fu .6s .6s forwards; }
+.hhl {
+  display:inline-block; font-family:var(--mono); font-size:11px;
+  color:var(--cyan); border:1px solid rgba(0,229,255,.2);
+  background:rgba(0,229,255,.04); padding:6px 14px;
+  margin-bottom:1.6rem; letter-spacing:.5px; line-height:1.6;
+  opacity:0; animation:fu .6s .7s forwards;
+}
+.htag2 { font-size:16px; color:var(--text2); max-width:520px; margin-bottom:2.2rem; line-height:1.9; opacity:0; animation:fu .6s .8s forwards; }
+.htag2 strong { color:var(--text); }
+.hbtns { display:flex; gap:1rem; flex-wrap:wrap; opacity:0; animation:fu .6s 1s forwards; }
+
+.btn-g {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:11px 26px; background:var(--green); color:#000;
+  font-family:var(--disp); font-size:13px; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase; text-decoration:none; border:none;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition:background .25s,transform .2s,box-shadow .25s; cursor:none;
+}
+.btn-g:hover { background:var(--cyan); box-shadow:0 0 28px rgba(0,229,255,.4); transform:translateY(-2px); }
+.btn-o {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 26px; background:transparent; color:var(--green);
+  font-family:var(--disp); font-size:13px; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase; text-decoration:none;
+  border:1px solid var(--green);
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition:background .25s,box-shadow .25s,transform .2s; cursor:none;
+}
+.btn-o:hover { background:rgba(0,255,136,.08); box-shadow:0 0 20px rgba(0,255,136,.2); transform:translateY(-2px); }
+
+/* AVATAR */
+.hvis { position:relative; display:flex; align-items:center; justify-content:center; opacity:0; animation:fi 1s .5s forwards; }
+.aring { position:relative; width:290px; height:290px; }
+.aring::before { content:''; position:absolute; inset:-8px; border-radius:50%; border:2px solid transparent; border-top-color:var(--green); border-right-color:var(--cyan); animation:spin 4s linear infinite; }
+.aring::after { content:''; position:absolute; inset:-18px; border-radius:50%; border:1px solid transparent; border-bottom-color:rgba(0,255,136,.25); border-left-color:rgba(0,229,255,.25); animation:spin 8s linear infinite reverse; }
+.ain { width:100%; height:100%; border-radius:50%; background:linear-gradient(135deg,#0c2535,#091828); border:2px solid rgba(0,255,136,.25); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.aini { font-family:var(--disp); font-size:4.8rem; font-weight:700; color:var(--green); text-shadow:0 0 40px rgba(0,255,136,.6); letter-spacing:4px; }
+.aglow { position:absolute; inset:-50px; border-radius:50%; background:radial-gradient(circle,rgba(0,255,136,.07) 0%,transparent 70%); pointer-events:none; }
+.chip { position:absolute; font-family:var(--mono); font-size:10px; color:var(--green); background:rgba(0,255,136,.05); border:1px solid rgba(0,255,136,.18); padding:4px 9px; white-space:nowrap; animation:fc 3s ease-in-out infinite; }
+.chip:nth-child(1){top:8%;right:-8%;animation-delay:0s}
+.chip:nth-child(2){top:36%;right:-16%;animation-delay:.4s}
+.chip:nth-child(3){bottom:22%;right:-6%;animation-delay:.9s}
+.chip:nth-child(4){top:18%;left:-12%;animation-delay:1.3s}
+.chip:nth-child(5){bottom:18%;left:-14%;animation-delay:.6s}
+.chip:nth-child(6){bottom:5%;right:-10%;animation-delay:1.7s}
+
+/* WAVEFORM */
+.wave-wrap { position:absolute; bottom:0; left:0; right:0; height:72px; opacity:.12; pointer-events:none; }
+
+/* ── SECTIONS ── */
+.sec { padding:90px 6%; max-width:1180px; margin:0 auto; }
+.sec-wrap { border-top:1px solid var(--border); }
+.slabel { font-family:var(--mono); font-size:11px; color:var(--green); letter-spacing:4px; text-transform:uppercase; margin-bottom:.4rem; }
+.stitle { font-family:var(--disp); font-size:clamp(1.7rem,3vw,2.6rem); font-weight:700; color:var(--text); position:relative; display:inline-block; margin-bottom:2.8rem; }
+.stitle::after { content:''; position:absolute; bottom:-8px; left:0; width:52px; height:2px; background:var(--green); box-shadow:0 0 10px var(--green); }
+
+/* REVEAL */
+.rv { opacity:0; transform:translateY(28px); transition:opacity .7s,transform .7s; }
+.rv.show { opacity:1; transform:none; }
+
+/* ── ABOUT ── */
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
+.about-text p { color:var(--text2); margin-bottom:1rem; line-height:1.9; }
+.about-text p strong { color:var(--text); }
+.stats { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.scard {
+  background:var(--bg3); border:1px solid var(--border); padding:1.5rem;
+  position:relative; overflow:hidden; transition:border-color .3s,transform .3s;
+}
+.scard::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--green); }
+.scard:hover { border-color:rgba(0,255,136,.25); transform:translateY(-3px); }
+.snum { font-family:var(--disp); font-size:2.1rem; font-weight:700; color:var(--green); text-shadow:0 0 18px rgba(0,255,136,.4); }
+.slbl { font-family:var(--mono); font-size:10px; color:var(--text3); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+
+/* ── EDUCATION ── */
+.edu-list { display:flex; flex-direction:column; gap:1.2rem; }
+.ecard {
+  background:var(--bg3); border:1px solid var(--border);
+  padding:1.6rem 2rem; display:grid; grid-template-columns:48px 1fr auto;
+  gap:1.4rem; align-items:center; position:relative; overflow:hidden;
+  transition:border-color .3s,transform .3s;
+}
+.ecard::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,var(--green),transparent); transform:scaleX(0); transform-origin:left; transition:transform .4s; }
+.ecard:hover { border-color:rgba(0,255,136,.22); transform:translateX(4px); }
+.ecard:hover::after { transform:scaleX(1); }
+.eico { width:48px; height:48px; background:rgba(0,255,136,.07); border:1px solid rgba(0,255,136,.18); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+.edeg { font-family:var(--disp); font-size:1.05rem; font-weight:600; color:var(--text); }
+.esch { font-size:.85rem; color:var(--text2); margin-top:2px; }
+.escore { font-family:var(--disp); font-size:1.3rem; font-weight:700; color:var(--cyan); text-align:right; }
+.eyr { font-family:var(--mono); font-size:11px; color:var(--text3); text-align:right; margin-top:2px; }
+
+/* ── SKILLS ── */
+.skills-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:1.2rem; }
+.skcol { background:var(--bg3); border:1px solid var(--border); padding:1.6rem; transition:border-color .3s; }
+.skcol:hover { border-color:rgba(0,255,136,.2); }
+.skchead { font-family:var(--mono); font-size:10px; color:var(--green); letter-spacing:3px; text-transform:uppercase; margin-bottom:.9rem; padding-bottom:.7rem; border-bottom:1px solid var(--border); }
+.tags { display:flex; flex-wrap:wrap; gap:7px; }
+.tag {
+  font-family:var(--mono); font-size:11px; padding:4px 11px;
+  border:1px solid var(--border); color:var(--text2); background:var(--bg2);
+  transition:border-color .3s,color .3s,background .3s,box-shadow .3s; cursor:default;
+}
+.tag:hover { border-color:var(--green); color:var(--green); background:rgba(0,255,136,.05); box-shadow:0 0 10px rgba(0,255,136,.12); }
+
+/* ── PROJECTS ── */
+.proj-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:1.4rem; }
+.pcard {
+  background:var(--bg3); border:1px solid var(--border); padding:2rem;
+  position:relative; overflow:hidden; transition:border-color .4s,transform .4s;
+  display:flex; flex-direction:column;
+}
+.pcard::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--green),var(--cyan)); transform:scaleX(0); transition:transform .4s; }
+.pcard:hover { border-color:rgba(0,255,136,.28); transform:translateY(-6px); }
+.pcard:hover::before { transform:scaleX(1); }
+.pnum { font-family:var(--mono); font-size:10px; color:var(--text3); margin-bottom:.6rem; }
+.ptitle { font-family:var(--disp); font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:.2rem; line-height:1.3; }
+.pperiod { font-family:var(--mono); font-size:10px; color:var(--cyan); margin-bottom:.9rem; }
+.pdesc { font-size:13px; color:var(--text2); line-height:1.85; margin-bottom:1rem; }
+.phigh { list-style:none; margin-bottom:1rem; }
+.phigh li { font-size:13px; color:var(--text2); padding:3px 0 3px 15px; position:relative; }
+.phigh li::before { content:'›'; position:absolute; left:0; color:var(--green); }
+.ptechs { display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; }
+.ptag { font-family:var(--mono); font-size:10px; padding:3px 9px; background:rgba(0,229,255,.05); border:1px solid rgba(0,229,255,.18); color:var(--cyan); }
+
+/* ── CERTS ── */
+.cert-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.2rem; }
+.certcard {
+  background:var(--bg3); border:1px solid var(--border); padding:1.5rem 1.75rem;
+  position:relative; overflow:hidden; transition:border-color .3s,transform .3s;
+}
+.certcard::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--yellow); }
+.certcard:hover { border-color:rgba(255,230,0,.25); transform:translateY(-3px); }
+.cname { font-family:var(--disp); font-size:1rem; font-weight:600; color:var(--text); margin-bottom:4px; }
+.cissuer { font-size:.85rem; color:var(--text2); }
+.cdate { font-family:var(--mono); font-size:10px; color:var(--yellow); margin-top:6px; }
+
+/* ── EXPERIENCE ── */
+.tl { position:relative; padding-left:2rem; }
+.tl::before { content:''; position:absolute; left:0; top:0; bottom:0; width:1px; background:linear-gradient(to bottom,var(--green),transparent); }
+.tli { position:relative; margin-bottom:2.2rem; padding-left:2rem; }
+.tli::before { content:''; position:absolute; left:-2rem; top:8px; width:10px; height:10px; border-radius:50%; background:var(--green); box-shadow:0 0 12px var(--green); transform:translateX(-4.5px); }
+.tlcard { background:var(--bg3); border:1px solid var(--border); padding:1.6rem 1.9rem; transition:border-color .3s; }
+.tlcard:hover { border-color:rgba(0,255,136,.22); }
+.tlrole { font-family:var(--disp); font-size:1.1rem; font-weight:700; color:var(--text); }
+.tlco { font-size:.88rem; color:var(--cyan); margin:3px 0 2px; }
+.tlperiod { font-family:var(--mono); font-size:10px; color:var(--text3); letter-spacing:1px; margin-bottom:.9rem; }
+.tlpts { list-style:none; }
+.tlpts li { font-size:13px; color:var(--text2); padding:3px 0 3px 16px; position:relative; }
+.tlpts li::before { content:'▸'; position:absolute; left:0; top:6px; color:var(--green); font-size:9px; }
+
+/* ── CONTACT ── */
+.ct-wrap { max-width:680px; margin:0 auto; text-align:center; }
+.ct-sub { font-size:1rem; color:var(--text2); margin-bottom:2.5rem; }
+.ct-links { display:flex; justify-content:center; gap:1.2rem; flex-wrap:wrap; margin-bottom:2.8rem; }
+.ctlink {
+  display:flex; align-items:center; gap:9px; padding:13px 24px;
+  border:1px solid var(--border); color:var(--text2); text-decoration:none;
+  font-family:var(--disp); font-size:13px; font-weight:600; letter-spacing:1px;
+  background:var(--bg3); transition:border-color .3s,color .3s,background .3s,transform .3s,box-shadow .3s;
+}
+.ctlink:hover { border-color:var(--green); color:var(--green); background:rgba(0,255,136,.05); transform:translateY(-3px); box-shadow:0 8px 28px rgba(0,255,136,.1); }
+.cf { max-width:520px; margin:0 auto; text-align:left; }
+.fg { margin-bottom:1.1rem; }
+.fg label { display:block; font-family:var(--mono); font-size:10px; color:var(--green); letter-spacing:2px; margin-bottom:5px; }
+.fg input,.fg textarea {
+  width:100%; background:var(--bg3); border:1px solid var(--border);
+  color:var(--text); font-family:var(--body); font-size:14px;
+  padding:11px 15px; outline:none; resize:vertical; transition:border-color .3s;
+}
+.fg input:focus,.fg textarea:focus { border-color:rgba(0,255,136,.35); box-shadow:0 0 0 1px rgba(0,255,136,.12); }
+.fe { font-family:var(--mono); font-size:10px; color:#ff4466; margin-top:3px; display:none; }
+.fg.err .fe { display:block; }
+.fg.err input,.fg.err textarea { border-color:rgba(255,68,102,.4); }
+.fsuc { font-family:var(--mono); font-size:12px; color:var(--green); border:1px solid rgba(0,255,136,.3); background:rgba(0,255,136,.04); padding:.9rem; text-align:center; display:none; margin-top:.9rem; }
+
+/* ── FOOTER ── */
+footer { border-top:1px solid var(--border); padding:1.8rem 6%; text-align:center; }
+footer p { font-family:var(--mono); font-size:11px; color:var(--text3); letter-spacing:1px; }
+footer span { color:var(--green); }
+
+/* ── ANIMS ── */
+@keyframes fu { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+@keyframes fi { from{opacity:0} to{opacity:1} }
+@keyframes spin { to{transform:rotate(360deg)} }
+@keyframes fc { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.cbl { display:inline-block; width:2px; height:1em; background:var(--green); animation:blink 1s infinite; vertical-align:text-bottom; margin-left:2px; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:920px){
+  .hero-wrap{grid-template-columns:1fr;text-align:center}
+  .htag2{margin:0 auto 2rem}
+  .hbtns{justify-content:center}
+  .hvis{display:none}
+  .about-grid{grid-template-columns:1fr;gap:2.5rem}
+  .nav-links{gap:1.2rem}
+}
+@media(max-width:600px){
+  .proj-grid,.skills-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .ecard{grid-template-columns:40px 1fr}
+  .escore,.eyr{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-title">// INITIALIZING PORTFOLIO.exe</div>
+  <div class="ld-bar"><div class="ld-fill" id="lf" style="width:0"></div></div>
+  <div class="ld-msg" id="lm">LOADING MODULES...</div>
+</div>
+
+<!-- CURSOR -->
+<div id="cur"></div>
+<div id="cur2"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="logo"><em>// </em>ANIRUDH<em>.exe</em></div>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#certs">Certs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div id="hero">
+  <canvas id="cbg"></canvas>
+  <div class="grid-bg"></div>
+  <div class="scan"></div>
+  <div class="hero-wrap">
+    <div>
+      <div class="htag">// ECE Engineer · Anurag University · Class of 2027</div>
+      <h1 class="hname">Nemani <span class="g">Anirudh</span></h1>
+      <div class="htitle">&gt; Embedded Systems &amp; FPGA Developer_<span class="cbl"></span></div>
+      <div class="hhl">ECE Student | Embedded Systems &amp; FPGA | Arduino · ESP32 · Embedded C · PLC · Verilog HDL · MATLAB · IoT | UART · SPI · I²C | Seeking Internship 2025</div>
+      <p class="htag2">
+        Building <strong>real hardware that works</strong> — from ESP32 firmware to Verilog RTL pipelines on Artix-7 FPGA.<br>
+        Engineered for <strong>precision</strong>. Optimized for <strong>impact</strong>.
+      </p>
+      <div class="hbtns">
+        <a href="#projects" class="btn-g">▶ View Projects</a>
+        <a href="#contact" class="btn-o">✉ Contact Me</a>
+      </div>
+    </div>
+    <div class="hvis">
+      <div class="aring">
+        <div class="aglow"></div>
+        <div class="ain"><div class="aini">AN</div></div>
+      </div>
+      <div class="chip">ESP32</div>
+      <div class="chip">Verilog RTL</div>
+      <div class="chip">Artix-7 FPGA</div>
+      <div class="chip">Arduino</div>
+      <div class="chip">PCB Design</div>
+      <div class="chip">MATLAB</div>
+    </div>
+  </div>
+  <svg class="wave-wrap" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <polyline id="wv" fill="none" stroke="#00ff88" stroke-width="1.5" points=""/>
+  </svg>
+</div>
+
+<!-- ABOUT -->
+<div class="sec-wrap"><div id="about" class="sec rv">
+  <div class="slabel">// 01. about</div>
+  <h2 class="stitle">About Me</h2>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>I'm a <strong>third-year Electronics and Communication Engineering student</strong> at Anurag University, Hyderabad (CGPA: 8.59), passionate about the full hardware stack — from UART/I²C firmware to synthesizable Verilog RTL.</p>
+      <p>My expertise spans <strong>FPGA-based RTL design</strong>, <strong>IoT embedded systems</strong>, <strong>MATLAB/Simulink modelling</strong>, and <strong>industrial instrumentation</strong>. I've built real-time motor protection firmware on ESP32, synthesized DSP pipelines on Xilinx Artix-7 achieving 14× hardware speedup, and designed PCBs end-to-end.</p>
+      <p>I also bring <strong>signal processing and ML experience</strong> through MATLAB — building species recognition systems using MFCC feature extraction and SVM/KNN classifiers with ~80% accuracy.</p>
+      <p>Currently seeking <strong>embedded systems / FPGA / automotive embedded internships</strong> where I can contribute to firmware development, hardware-software integration, and real-time system design.</p>
+    </div>
+    <div class="stats">
+      <div class="scard"><div class="snum">8.59</div><div class="slbl">CGPA / 10.0</div></div>
+      <div class="scard"><div class="snum">4+</div><div class="slbl">Major Projects</div></div>
+      <div class="scard"><div class="snum">14×</div><div class="slbl">FPGA Speedup</div></div>
+      <div class="scard"><div class="snum">1</div><div class="slbl">Patent Filed</div></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- EDUCATION -->
+<div class="sec-wrap"><div id="education" class="sec rv">
+  <div class="slabel">// 02. education</div>
+  <h2 class="stitle">Education</h2>
+  <div class="edu-list">
+    <div class="ecard">
+      <div class="eico">🎓</div>
+      <div><div class="edeg">B.Tech — Electronics &amp; Communication Engineering</div><div class="esch">Anurag University, Hyderabad, Telangana</div></div>
+      <div><div class="escore">8.59 / 10</div><div class="eyr">2023 – Present</div></div>
+    </div>
+    <div class="ecard">
+      <div class="eico">📚</div>
+      <div><div class="edeg">Class XII — TSBIE</div><div class="esch">Trividyaa Junior College, Hyderabad, Telangana</div></div>
+      <div><div class="escore">91%</div><div class="eyr">2021 – 2023</div></div>
+    </div>
+    <div class="ecard">
+      <div class="eico">🏫</div>
+      <div><div class="edeg">Class X — SSLC</div><div class="esch">The Secunderabad Public School, Hyderabad</div></div>
+      <div><div class="escore">77%</div><div class="eyr">2021</div></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- SKILLS -->
+<div class="sec-wrap"><div id="skills" class="sec rv">
+  <div class="slabel">// 03. technical skills</div>
+  <h2 class="stitle">Technical Skills</h2>
+  <div class="skills-grid">
+    <div class="skcol">
+      <div class="skchead">▸ Microcontrollers &amp; Processors</div>
+      <div class="tags">
+        <span class="tag">Arduino Uno/Nano</span>
+        <span class="tag">ESP32</span>
+        <span class="tag">8086</span>
+        <span class="tag">8051</span>
+        <span class="tag">TMS320C50 DSP</span>
+      </div>
+    </div>
+    <div class="skcol">
+      <div class="skchead">▸ Communication Protocols</div>
+      <div class="tags">
+        <span class="tag">I²C</span>
+        <span class="tag">SPI</span>
+        <span class="tag">UART</span>
+        <span class="tag">CAN (basics)</span>
+        
+    
+      </div>
+    </div>
+    <div class="skcol">
+      <div class="skchead">▸ Programming Languages</div>
+      <div class="tags">
+        <span class="tag">Embedded C</span>
+        <span class="tag">Verilog HDL</span>
+        <span class="tag">Python (basics)</span>
+      </div>
+    </div>
+    <div class="skcol">
+      <div class="skchead">▸ Tools &amp; Software</div>
+      <div class="tags">
+        <span class="tag">MATLAB</span>
+        <span class="tag">Simulink</span>
+        <span class="tag">Stateflow (basics)</span>
+        <span class="tag">Xilinx Vivado</span>
+        <span class="tag">Cadence</span>
+      </div>
+    </div>
+    <div class="skcol">
+      <div class="skchead">▸ FPGA Platforms</div>
+      <div class="tags">
+        <span class="tag">Xilinx Artix-7</span>
+        <span class="tag">Xilinx Zynq-7</span>
+        <span class="tag">DSP48E1 Slices</span>
+        <span class="tag">Block RAM</span>
+        <span class="tag">Fixed-Point Q16.16</span>
+      </div>
+    </div>
+    <div class="skcol">
+      <div class="skchead">▸ Hardware Skills</div>
+      <div class="tags">
+        <span class="tag">PCB Design</span>
+        <span class="tag">PCB Fabrication</span>
+        <span class="tag">Circuit Design</span>
+        <span class="tag">Sensor Integration</span>
+        <span class="tag">Contactor Control</span>
+      </div>
+    </div>
+    <div class="skcol">
+      <div class="skchead">▸ Sensors</div>
+      <div class="tags">
+        <span class="tag">ACS712 (Current)</span>
+        <span class="tag">AS7265x Vis-NIR</span>
+        <span class="tag">DHT22 Temp/Humidity</span>
+        <span class="tag">Soil Moisture</span>
+        <span class="tag">Pulse Rate</span>
+        <span class="tag">FSR</span>
+        <span class="tag">Isolated AC Voltage</span>
+      </div>
+    </div>
+    <div class="skcol">
+      <div class="skchead">▸ Industrial Instrumentation</div>
+      <div class="tags">
+        <span class="tag">RTD</span>
+        <span class="tag">Thermocouple</span>
+        <span class="tag">Temperature Transmitters</span>
+        <span class="tag">Process Control</span>
+      </div>
+    </div>
+    <div class="skcol">
+      <div class="skchead">▸ Domains</div>
+      <div class="tags">
+        <span class="tag">Embedded Firmware</span>
+        <span class="tag">IoT Systems</span>
+        <span class="tag">Signal Processing</span>
+        <span class="tag">FPGA Design</span>
+        <span class="tag">MFCC Feature Extraction</span>
+        <span class="tag">SVM / KNN (ML)</span>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<!-- PROJECTS -->
+<div class="sec-wrap"><div id="projects" class="sec rv">
+  <div class="slabel">// 04. projects</div>
+  <h2 class="stitle">Projects</h2>
+  <div class="proj-grid">
+
+    <div class="pcard">
+      <div class="pnum">PROJECT_01</div>
+      <div class="ptitle">FPGA-Based Real-Time Soil Nutrient Analyzer</div>
+      <div class="pperiod">Jan 2025 – Present · AMD/Xilinx FPGA Hackathon 2026</div>
+      <p class="pdesc">Complete synthesizable Verilog RTL pipeline on XC7A35T-FTG256-1 predicting 5 soil nutrients from 18-channel Vis-NIR spectral data within 847 µs at under 2W.</p>
+      <ul class="phigh">
+        <li>400 kHz I²C master (15-state FSM) for AMS AS7265x 18-channel sensor</li>
+        <li>Q16.16 fixed-point DSP pipeline with 5-tap Savitzky-Golay smoothing</li>
+        <li>DSP48E1 MAC slices — 90 MAC ops, <strong style="color:var(--green)">14× faster</strong> than ARM Cortex-M4</li>
+        <li>Hardware-accelerated Multiple Linear Regression engine</li>
+      </ul>
+      <div class="ptechs">
+        <span class="ptag">Verilog RTL</span><span class="ptag">Artix-7</span><span class="ptag">Vivado</span><span class="ptag">DSP48E1</span><span class="ptag">I²C FSM</span><span class="ptag">Q16.16 Fixed-Point</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="pnum">PROJECT_02</div>
+      <div class="ptitle">IoT-Based Smart Motor Protection System</div>
+      <div class="pperiod">March 2025 – Present</div>
+      <p class="pdesc">Real-time firmware on ESP32 protecting a 415V three-phase induction motor (agricultural borewell pumps), with fault response under 100 ms.</p>
+      <ul class="phigh">
+        <li>Three-phase current monitoring via ACS712 over UART — overload &amp; phase-loss detection</li>
+        <li>Isolated AC voltage sensor over I²C — guards &lt;360V / &gt;440V faults</li>
+        <li>Auto motor disconnection via contactor relay on fault persistence</li>
+        <li>Eliminated manual intervention entirely through automated trip logic</li>
+      </ul>
+      <div class="ptechs">
+        <span class="ptag">ESP32</span><span class="ptag">Embedded C</span><span class="ptag">I²C</span><span class="ptag">UART</span><span class="ptag">ACS712</span><span class="ptag">IoT</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="pnum">PROJECT_03</div>
+      <div class="ptitle">Smart Assistive Pen &amp; Pad — Learning Disabilities</div>
+      <div class="pperiod">Sep 2025 – Jan 2026</div>
+      <p class="pdesc">Patented assistive technology for children with ADHD, Autism, and Speech Construction Disorder. Won 3rd prize competing against 30+ teams.</p>
+      <ul class="phigh">
+        <li>🏆 Patent secured + 3rd prize at department-wide tech hackathon</li>
+        <li>Pulse rate + FSR sensors over I²C + vibration haptic motor on ESP32 wristband</li>
+        <li>Smart stylus with ML-based handwriting irregularity detection</li>
+        <li>Personalized speech therapy, focus exercises, and audio-video learning modules</li>
+      </ul>
+      <div class="ptechs">
+        <span class="ptag">ESP32</span><span class="ptag">Embedded C</span><span class="ptag">I²C</span><span class="ptag">FSR</span><span class="ptag">ML</span><span class="ptag">Haptics</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="pnum">PROJECT_04</div>
+      <div class="ptitle">Smart Species Recognition via Speech Signal</div>
+      <div class="pperiod">Oct 2024 – Nov 2024</div>
+      <p class="pdesc">MATLAB-based intelligent animal species recognition from vocalizations using audio signal processing. Built as a 4-member team project.</p>
+      <ul class="phigh">
+        <li>MFCC feature extraction via MATLAB Signal Processing Toolbox</li>
+        <li>Trained SVM and KNN classifiers — ~80% species classification accuracy</li>
+        <li>End-to-end MATLAB pipeline: audio I/O → preprocessing → feature extraction → evaluation</li>
+      </ul>
+      <div class="ptechs">
+        <span class="ptag">MATLAB</span><span class="ptag">Signal Processing</span><span class="ptag">MFCC</span><span class="ptag">SVM</span><span class="ptag">KNN</span><span class="ptag">Machine Learning</span>
+      </div>
+    </div>
+
+  </div>
+</div></div>
+
+<!-- EXPERIENCE -->
+<div class="sec-wrap"><div id="experience" class="sec rv">
+  <div class="slabel">// 05. experience &amp; workshops</div>
+  <h2 class="stitle">Experience</h2>
+  <div class="tl">
+
+    <div class="tli">
+      <div class="tlcard">
+        <div class="tlrole">Engineering Intern</div>
+        <div class="tlco">Vedsri IT Solutions Pvt. Ltd. · ISO 9001 Certified · Hyderabad, Telangana</div>
+        <div class="tlperiod">ELECTRONIC INSTRUMENTATION &amp; INDUSTRIAL TEMPERATURE SENSING</div>
+        <ul class="tlpts">
+          <li>Interned at an ISO 9001-certified manufacturer of process control instruments specialising in temperature measurement and industrial automation.</li>
+          <li>Hands-on exposure to RTDs and Thermocouples — operating principles, accuracy characteristics, and signal behaviour under real field conditions.</li>
+          <li>Assisted engineers in evaluating sensor suitability by analysing operating environment, temperature range, industry type, and measurement accuracy requirements.</li>
+          <li>Developed practical understanding of RTD vs Thermocouple trade-offs: high precision &amp; stability vs wide temperature range &amp; rugged construction.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tli">
+      <div class="tlcard">
+        <div class="tlrole">PCB Design Workshop</div>
+        <div class="tlco">Physitech Electronics · Anurag University, Hyderabad</div>
+        <div class="tlperiod">PRINTED CIRCUIT BOARD DESIGN &amp; FABRICATION</div>
+        <ul class="tlpts">
+          <li>Fabricated a fully functional PCB — schematic entry, component placement, routing, and board-level testing.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tli">
+      <div class="tlcard">
+        <div class="tlrole">Tech Lead — VLSI Club</div>
+        <div class="tlco">Anurag University</div>
+        <div class="tlperiod">VLSI DESIGN · SEMICONDUCTOR · FPGA SYSTEMS</div>
+        <ul class="tlpts">
+          <li>Led organisation of technical competitions and workshops on VLSI design, semiconductor technologies, and FPGA-based systems.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tli">
+      <div class="tlcard">
+        <div class="tlrole">IETE Student Chapter Member</div>
+        <div class="tlco">Institution of Electronics &amp; Telecommunication Engineers</div>
+        <div class="tlperiod">EMBEDDED SYSTEMS · COMMUNICATION TECHNOLOGIES</div>
+        <ul class="tlpts">
+          <li>Participated in technical conferences and seminars covering embedded systems and communication technologies.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div></div>
+
+<!-- CERTIFICATIONS -->
+<div class="sec-wrap"><div id="certs" class="sec rv">
+  <div class="slabel">// 06. certifications</div>
+  <h2 class="stitle">Certifications</h2>
+  <div class="cert-grid">
+    <div class="certcard">
+      <div class="cname">MATLAB Onramp</div>
+      <div class="cissuer">MathWorks — Fundamentals of MATLAB programming and data analysis</div>
+      <div class="cdate">Jan 2025 – Feb 2025</div>
+    </div>
+    <div class="certcard">
+      <div class="cname">Simulink Onramp</div>
+      <div class="cissuer">MathWorks — Model-based design and Simulink simulation fundamentals</div>
+      <div class="cdate">Dec 2025 – Jan 2026</div>
+    </div>
+    <div class="certcard">
+      <div class="cname">Python Basics Certification</div>
+      <div class="cissuer">Simplilearn — Core Python programming and scripting</div>
+      <div class="cdate">Jan 2026 – Feb 2026</div>
+    </div>
+  </div>
+</div></div>
+
+<!-- CONTACT -->
+<div class="sec-wrap"><div id="contact" class="sec rv">
+  <div class="ct-wrap">
+    <div class="slabel" style="text-align:center">// 07. contact</div>
+    <h2 class="stitle" style="display:block;text-align:center">Get In Touch</h2>
+    <p class="ct-sub" style="margin-top:1.5rem">Open to embedded systems, FPGA, and automotive embedded internships. Let's build something real.</p>
+    <div class="ct-links">
+      <a href="mailto:nanirudh01@gmail.com" class="ctlink"><span>✉</span> nanirudh01@gmail.com</a>
+      <a href="https://www.linkedin.com/in/anirudhnss/" target="_blank" class="ctlink"><span>🔗</span> LinkedIn Profile</a>
+      <a href="tel:+916309357616" class="ctlink"><span>📞</span> +91 6309357616</a>
+    </div>
+    <div class="cf">
+      <div class="fg" id="fg1"><label>// YOUR_NAME</label><input type="text" id="fn" placeholder="Enter your name"><div class="fe">Name is required.</div></div>
+      <div class="fg" id="fg2"><label>// YOUR_EMAIL</label><input type="email" id="fe" placeholder="Enter your email"><div class="fe">Valid email required.</div></div>
+      <div class="fg" id="fg3"><label>// MESSAGE</label><textarea id="fm" rows="4" placeholder="Your message..."></textarea><div class="fe">Message cannot be empty.</div></div>
+      <button class="btn-g" style="width:100%;justify-content:center;cursor:none" onclick="sendForm()">▶ Send Message</button>
+      <div class="fsuc" id="fsuc">✓ MESSAGE TRANSMITTED — I'll get back to you soon.</div>
+    </div>
+  </div>
+</div></div>
+
+<footer>
+  <p>Designed &amp; Built by <span>Nemani Anirudh</span> · ECE @ Anurag University · Hyderabad · <span>2025</span></p>
+</footer>
+
+<script>
+// LOADER
+const msgs=['LOADING MODULES...','INITIALIZING FPGA CORES...','BOOTING FIRMWARE...','COMPILING RTL...','READY.'];
+let li=0;
+const lf=document.getElementById('lf'),lm=document.getElementById('lm');
+const lti=setInterval(()=>{
+  li++;
+  if(li<msgs.length) lm.textContent=msgs[li];
+  lf.style.width=(li/msgs.length*100)+'%';
+  if(li>=msgs.length){clearInterval(lti);setTimeout(()=>document.getElementById('loader').classList.add('off'),350);}
+},480);
+
+// CURSOR
+const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function anim(){
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  rx+=(mx-rx)*.13;ry+=(my-ry)*.13;
+  cur2.style.left=rx+'px';cur2.style.top=ry+'px';
+  requestAnimationFrame(anim);
+})();
+document.querySelectorAll('a,button,.tag,.pcard,.ecard,.scard,.ctlink,.certcard').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('big'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('big'));
+});
+
+// NAV SCROLL + ACTIVE
+const nav=document.getElementById('nav');
+const secs=document.querySelectorAll('[id]');
+const nlinks=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('lit',scrollY>50);
+  let cur2s='';
+  secs.forEach(s=>{if(scrollY>=s.offsetTop-130)cur2s=s.id;});
+  nlinks.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+cur2s));
+});
+
+// REVEAL
+const rvels=document.querySelectorAll('.rv');
+new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');}});
+},{threshold:0.08}).observe(...[...rvels].map(r=>{
+  new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show');});},{threshold:0.08}).observe(r);
+  return r;
+}));
+
+// CIRCUIT CANVAS
+const cv=document.getElementById('cbg'),ctx=cv.getContext('2d');
+function rsz(){cv.width=innerWidth;cv.height=innerHeight;}rsz();
+window.addEventListener('resize',rsz);
+const pts=Array.from({length:45},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28}));
+(function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  pts.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>cv.width)p.vx*=-1;
+    if(p.y<0||p.y>cv.height)p.vy*=-1;
+    pts.forEach((q,j)=>{
+      const dx=q.x-p.x,dy=q.y-p.y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<190){
+        ctx.globalAlpha=(1-d/190)*.55;
+        ctx.strokeStyle='#00ff88';ctx.lineWidth=.5;
+        ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,q.y);ctx.lineTo(q.x,q.y);ctx.stroke();
+      }
+    });
+    ctx.globalAlpha=.8;ctx.fillStyle='#00ff88';
+    ctx.beginPath();ctx.arc(p.x,p.y,1.4,0,Math.PI*2);ctx.fill();
+  });
+  ctx.globalAlpha=1;
+  requestAnimationFrame(draw);
+})();
+
+// WAVEFORM
+const wv=document.getElementById('wv');let wt=0;
+(function wdraw(){
+  wt+=.018;let s='';
+  for(let x=0;x<=1440;x+=5){
+    const y=36+Math.sin((x/75)+wt)*16+Math.sin((x/38)+wt*1.6)*7;
+    s+=x+','+y+' ';
+  }
+  wv.setAttribute('points',s);requestAnimationFrame(wdraw);
+})();
+
+// FORM
+function sendForm(){
+  const fn=document.getElementById('fn'),fe=document.getElementById('fe'),fm=document.getElementById('fm');
+  const re=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  document.getElementById('fg1').classList.toggle('err',!fn.value.trim());
+  document.getElementById('fg2').classList.toggle('err',!re.test(fe.value));
+  document.getElementById('fg3').classList.toggle('err',!fm.value.trim());
+  if(!fn.value.trim()||!re.test(fe.value)||!fm.value.trim())return;
+  document.getElementById('fsuc').style.display='block';
+  fn.value='';fe.value='';fm.value='';
+}
+</script>
+</body>
+</html>
